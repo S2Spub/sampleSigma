@@ -1,0 +1,33 @@
+title: Detection of Credential Dumping via PowerShell and Rundll32
+id: 9a33c8c5-9b3a-48f8-bec8-f083a4594c90
+status: experimental
+description: Detects the use of PowerShell and rundll32 for credential dumping activities, including file manipulation and LSASS memory dumping as used by threat actor DEV-0270.
+references:
+  - https://www.microsoft.com/en-us/security/blog/2022/09/07/profiling-dev-0270-phosphorus-ransomware-operations
+author: System Two Security
+date: '2025-04-05'
+tags:
+  - attack.credential-access
+  - attack.t1003.001
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection1:
+    Image|endswith: \powershell.exe
+    CommandLine|contains|all:
+      - C:\windows\temp\
+      - Compress-Archive
+      - -Path C:\windows\temp\ssasl.pmd
+      - Remove-Item
+      - C:\windows\temp\ssasl.pmd
+  selection2:
+    Image|endswith: \rundll32.exe
+    CommandLine|contains|all:
+      - Get-Process lsass
+      - C:\windows\System32\comsvcs.dll, MiniDump
+      - C:\windows\temp\ssasl.pmd
+  condition: selection1 and selection2
+falsepositives:
+  - Legitimate administrative activities that involve PowerShell and rundll32 usage in a similar context.
+level: high

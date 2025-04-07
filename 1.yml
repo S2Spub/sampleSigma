@@ -1,0 +1,24 @@
+title: Block Credential Stealing from LSASS
+id: 26345321-1e60-423d-8d4c-72c455cc20e1
+status: experimental
+description: Detects attempts to access or manipulate the lsass.exe process, which is commonly targeted for credential theft.
+references:
+  - https://www.microsoft.com/en-us/security/blog/2022/09/07/profiling-dev-0270-phosphorus-ransomware-operations
+author: System Two Security
+date: '2025-04-05'
+tags:
+  - attack.credential-access
+  - attack.t1003.001
+logsource:
+  product: windows
+  category: process_access
+detection:
+  selection:
+    TargetImage: C:\\Windows\\System32\\lsass.exe
+    GrantedAccess|contains|all:
+      - '0x1010'
+      - '0x1410'
+  condition: selection
+falsepositives:
+  - Legitimate administrative activities that require access to lsass.exe
+level: high
